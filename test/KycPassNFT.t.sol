@@ -29,12 +29,7 @@ contract KycPassNFTTest is Test {
         kycPassNFT.grantRole(kycPassNFT.KYC_ISSUER_ROLE(), KYC_ISSUER);
         vm.stopPrank();
 
-        meta = IKycPassNFT.PassMeta({
-            tier: 1,
-            expiresAt: uint64(block.timestamp + 1 days),
-            countryCode: bytes32("CN")
-        });
-
+        meta = IKycPassNFT.PassMeta({tier: 1, expiresAt: uint64(block.timestamp + 1 days), countryCode: bytes32("CN")});
     }
 
     function testInitialRoles() public view {
@@ -45,10 +40,10 @@ contract KycPassNFTTest is Test {
 
     function test_MintPass_Success() public {
         vm.startPrank(KYC_ISSUER);
-        uint256 tokenId = kycPassNFT.mintPass(USER1,meta);
+        uint256 tokenId = kycPassNFT.mintPass(USER1, meta);
         vm.stopPrank();
 
-        assertEq(kycPassNFT.passOf(USER1),tokenId);
+        assertEq(kycPassNFT.passOf(USER1), tokenId);
         assertEq(kycPassNFT.ownerOf(tokenId), USER1);
 
         (bool ok, IKycPassNFT.PassMeta memory got) = kycPassNFT.hasValidPass(USER1);
@@ -58,24 +53,24 @@ contract KycPassNFTTest is Test {
         assertEq(got.countryCode, meta.countryCode);
     }
 
-    function test_RevokePass_Success() public{
+    function test_RevokePass_Success() public {
         vm.startPrank(KYC_ISSUER);
-        uint256 tokenId = kycPassNFT.mintPass(USER1,meta);
+        uint256 tokenId = kycPassNFT.mintPass(USER1, meta);
 
         kycPassNFT.revokePass(tokenId);
         vm.stopPrank();
-        
+
         // passOf 清空，hasValidPass=false，token 不存在
-        assertEq(kycPassNFT.passOf(USER1),0);
-        (bool ok, ) = kycPassNFT.hasValidPass(USER1);
+        assertEq(kycPassNFT.passOf(USER1), 0);
+        (bool ok,) = kycPassNFT.hasValidPass(USER1);
         assertFalse(ok);
         vm.expectRevert();
         kycPassNFT.ownerOf(tokenId);
     }
 
-    function test_SBT() public{
+    function test_SBT() public {
         vm.startPrank(KYC_ISSUER);
-        uint256 tokenId = kycPassNFT.mintPass(USER1,meta);
+        uint256 tokenId = kycPassNFT.mintPass(USER1, meta);
         vm.stopPrank();
 
         // transferfrom && safetransferfrom
@@ -88,13 +83,27 @@ contract KycPassNFTTest is Test {
 
         // approve && setApprovalForAll
         vm.expectRevert(IKycPassNFT.IKycPassNFT__TransferDisabled.selector);
-        kycPassNFT.approve(USER2,tokenId);
+        kycPassNFT.approve(USER2, tokenId);
 
         vm.expectRevert(IKycPassNFT.IKycPassNFT__TransferDisabled.selector);
-        kycPassNFT.setApprovalForAll(USER2,true);
+        kycPassNFT.setApprovalForAll(USER2, true);
 
         vm.stopPrank();
-
     }
 
+    // 重复mint失败
+    function test_Revert_KycPassNFT__AlreadyHasPass() public {
+        vm.startPrank(KYC_ISSUER);
+        kycPassNFT.mintPass(USER1, meta);
+
+        vm.expectRevert(abi.encodeWithSelector(KycPassNFT.KycPassNFT__AlreadyHasPass.selector, USER1));
+        kycPassNFT.mintPass(USER1, meta);
+        vm.stopPrank();
+    }
+
+    // 其他人不能mint
+    function test_Revert_IKycPassNFT__NotAuthorized() public {}
+
+    // pass过期
+    function test_Revert_IKycPassNFT__InvalidOrExpiredPass() public {}
 }

@@ -6,7 +6,6 @@ import {Script, console2} from "forge-std/Script.sol";
 struct ChainConfig {
     // Deployer
     uint256 deployerPrivateKey;
-
 }
 
 contract HelperConfig is Script {
@@ -42,16 +41,12 @@ contract HelperConfig is Script {
     }
 
     function getOrCreateAnvilConfig() public view returns (ChainConfig memory AnvilConfig) {
-        AnvilConfig = ChainConfig({
-            deployerPrivateKey: vm.envUint(ANVIL_PRIVATE_KEY)
-        });
+        AnvilConfig = ChainConfig({deployerPrivateKey: vm.envUint(ANVIL_PRIVATE_KEY)});
         return AnvilConfig;
     }
 
     function getSepoliaConfig() public view returns (ChainConfig memory SepoliaConfig) {
-        SepoliaConfig = ChainConfig({
-            deployerPrivateKey: vm.envUint(SEPOLIA_PRIVATE_KEY)
-        });
+        SepoliaConfig = ChainConfig({deployerPrivateKey: vm.envUint(SEPOLIA_PRIVATE_KEY)});
         return SepoliaConfig;
     }
 

@@ -27,9 +27,7 @@ contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
     string private _baseTokenURI;
 
     // ---------- Constructor ----------
-    constructor(string memory name_, string memory symbol_, address admin)
-        ERC721(name_, symbol_)
-    {
+    constructor(string memory name_, string memory symbol_, address admin) ERC721(name_, symbol_) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(KYC_ISSUER_ROLE, admin);
     }
@@ -59,19 +57,13 @@ contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
         override(ERC721, AccessControl, IKycPassNFT)
         returns (bool)
     {
-        return
-            interfaceId == type(IKycPassNFT).interfaceId ||
-            ERC721.supportsInterface(interfaceId) ||
-            AccessControl.supportsInterface(interfaceId);
+        return interfaceId == type(IKycPassNFT).interfaceId || ERC721.supportsInterface(interfaceId)
+            || AccessControl.supportsInterface(interfaceId);
     }
 
     // ---------- IKycPassNFT: Mutations ----------
     /// @inheritdoc IKycPassNFT
-    function mintPass(address to, PassMeta calldata meta)
-        external
-        override
-        returns (uint256 tokenId)
-    {
+    function mintPass(address to, PassMeta calldata meta) external override returns (uint256 tokenId) {
         // 自定义权限检查
         if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender) && !hasRole(KYC_ISSUER_ROLE, msg.sender)) {
             revert IKycPassNFT__NotAuthorized();
@@ -79,7 +71,7 @@ contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
         if (to == address(0)) revert IKycPassNFT__NotAuthorized();
         if (passOf[to] != 0) revert KycPassNFT__AlreadyHasPass(to);
 
-        tokenId = ++_tokenIdCounter;          // 从 1 开始
+        tokenId = ++_tokenIdCounter; // 从 1 开始
         _passMeta[tokenId] = meta;
         passOf[to] = tokenId;
 
@@ -107,11 +99,7 @@ contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
      * @dev OZ v5 的统一转移入口。仅允许 mint（from=0）或 burn（to=0），禁止 from!=0 && to!=0 的场景。
      * 就是全局的权限校验，写出校验规则，调用父类的方法就好了
      */
-    function _update(address to, uint256 tokenId, address auth)
-        internal
-        override
-        returns (address from)
-    {
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address from) {
         from = _ownerOf(tokenId); // 读取转移前的 owner（mint 时为 0，burn 时 to 为 0）
         if (from != address(0) && to != address(0)) {
             revert IKycPassNFT__TransferDisabled();
@@ -127,8 +115,4 @@ contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
     function setApprovalForAll(address, bool) public pure override {
         revert IKycPassNFT__TransferDisabled();
     }
-
-
-
-
 }

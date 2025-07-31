@@ -33,13 +33,13 @@ interface ISimpleRwVault {
 
     // ----------------------- Errors -----------------------
 
-    error NotAuthorized();           // 非管理员/角色
-    error NotKycQualified();         // 未持有有效 KYC 通行证
-    error InvalidAmount();           // 金额为 0 或超限
-    error InsufficientAssets();      // 金库可用 USDC 不足以兑付
-    error SweepNotAllowed();         // 尝试清扫受保护的代币（USDC/份额）
-    error PausedError();             // 金库处于暂停态
-    error ZeroAddress();             // 零地址非法
+    error NotAuthorized(); // 非管理员/角色
+    error NotKycQualified(); // 未持有有效 KYC 通行证
+    error InvalidAmount(); // 金额为 0 或超限
+    error InsufficientAssets(); // 金库可用 USDC 不足以兑付
+    error SweepNotAllowed(); // 尝试清扫受保护的代币（USDC/份额）
+    error PausedError(); // 金库处于暂停态
+    error ZeroAddress(); // 零地址非法
 
     // ----------------------- Views -----------------------
 
