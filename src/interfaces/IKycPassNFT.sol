@@ -33,13 +33,13 @@ interface IKycPassNFT {
     // ----------------------- Errors -----------------------
 
     /// @notice 非授权（非管理员/发行人）调用受限函数
-    error NotAuthorized();
+    error IKycPassNFT__NotAuthorized();
 
     /// @notice 通行证不可转让（SBT 语义）
-    error TransferDisabled();
+    error IKycPassNFT__TransferDisabled();
 
     /// @notice 通行证不存在或已失效
-    error InvalidOrExpiredPass();
+    error IKycPassNFT__InvalidOrExpiredPass();
 
     // ----------------------- Views -----------------------
 
