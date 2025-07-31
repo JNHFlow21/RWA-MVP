@@ -6,6 +6,10 @@ import {KycPassNFT} from "../src/KycPassNFT.sol";
 import {ChainConfig} from "../script/HelperConfig.s.sol";
 import {DeployAll} from "../script/DeployAll.s.sol";
 import {IKycPassNFT} from "../src/interfaces/IKycPassNFT.sol";
+import {IERC721} from "@openzeppelin/contracts/interfaces/IERC721.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+
 
 contract KycPassNFTTest is Test {
     KycPassNFT kycPassNFT;
@@ -102,8 +106,30 @@ contract KycPassNFTTest is Test {
     }
 
     // 其他人不能mint
-    function test_Revert_IKycPassNFT__NotAuthorized() public {}
+    function test_Revert_IKycPassNFT__NotAuthorized() public {
+        vm.startPrank(USER1);
+        vm.expectRevert(IKycPassNFT.IKycPassNFT__NotAuthorized.selector);
+        kycPassNFT.mintPass(USER2, meta);
+        vm.stopPrank();
+    }
 
     // pass过期
-    function test_Revert_IKycPassNFT__InvalidOrExpiredPass() public {}
+    function test_Revert_IKycPassNFT__InvalidOrExpiredPass() public {
+        vm.startPrank(KYC_ISSUER);
+        kycPassNFT.mintPass(USER1, meta);
+
+        // 快进到过期之后
+        vm.warp(block.timestamp + 2 days);
+
+        (bool ok, ) = kycPassNFT.hasValidPass(USER1);
+        assertFalse(ok);
+    }
+
+    function test_SupportsInterface() public view{
+        assertTrue(kycPassNFT.supportsInterface(type(IERC721).interfaceId));
+        assertTrue(kycPassNFT.supportsInterface(type(IERC721Metadata).interfaceId));
+        assertTrue(kycPassNFT.supportsInterface(type(IAccessControl).interfaceId));
+        assertTrue(kycPassNFT.supportsInterface(type(IKycPassNFT).interfaceId));
+        assertFalse(kycPassNFT.supportsInterface(0xffffffff));
+    }
 }
