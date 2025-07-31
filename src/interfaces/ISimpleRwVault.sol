@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IKycPassNFT} from "./IKycPassNFT.sol";
 import {IVaultToken} from "./IVaultToken.sol";
 
-/// @title ISimpleRwVault - RWA 极简金库（1:1 申购赎回）接口
+/// @title ISimpleRwVault - RWA 极简金库（USDC 1:1 申购赎回）接口
 /// @notice 仅允许持有有效 KYC 通行证的钱包进行申购/赎回；
 ///         以 USDC 为基础资产，采用 1:1 的份额记账（MVP），不含 NAV / 排队。
 /// @dev 建议实现 ReentrancyGuard、Pausable、AccessControl。
@@ -27,49 +28,48 @@ interface ISimpleRwVault {
     /// @param newURI 新的披露链接
     event ReportUpdated(string newURI);
 
-    /// @notice 金库暂停/恢复
-    event Paused(address account);
-    event Unpaused(address account);
-
     // ----------------------- Errors -----------------------
 
-    error NotAuthorized(); // 非管理员/角色
-    error NotKycQualified(); // 未持有有效 KYC 通行证
-    error InvalidAmount(); // 金额为 0 或超限
-    error InsufficientAssets(); // 金库可用 USDC 不足以兑付
-    error SweepNotAllowed(); // 尝试清扫受保护的代币（USDC/份额）
-    error PausedError(); // 金库处于暂停态
-    error ZeroAddress(); // 零地址非法
+    error ISimpleRwVault__NotAuthorized(); // 非管理员/角色（若用 AccessControl，可替换为标准错误）
+    error ISimpleRwVault__NotKycQualified(); // 未持有有效 KYC 通行证
+    error ISimpleRwVault__InvalidAmount(); // 金额为 0 或超限
+    error ISimpleRwVault__InsufficientAssets(); // 金库可用 USDC 不足以兑付
+    error ISimpleRwVault__SweepNotAllowed(); // 尝试清扫受保护的代币（USDC/份额）
+    error ISimpleRwVault__PausedError(); // 金库处于暂停态
+    error ISimpleRwVault__ZeroAddress(); // 零地址非法
 
     // ----------------------- Views -----------------------
 
-    /// @notice 基础资产（USDC）合约地址
-    function asset() external view returns (address);
+    /// @notice 基础资产（USDC）合约
+    function asset() external view returns (IERC20);
 
-    /// @notice 份额代币合约地址
+    /// @notice 份额代币合约
     function shareToken() external view returns (IVaultToken);
 
-    /// @notice KYC 通行证合约地址
+    /// @notice KYC 通行证合约
     function kycPass() external view returns (IKycPassNFT);
 
     /// @notice 当前披露报告链接（IPFS/网页）
     function reportURI() external view returns (string memory);
 
-    /// @notice 单笔最小/最大存入限制（可选）
+    /// @notice 单笔最小/最大存入限制（0 表示不限制）
     function minDeposit() external view returns (uint256);
     function maxDepositPerTx() external view returns (uint256);
 
-    /// @notice 金库当前托管的 USDC 余额（不含未结算外部资产；MVP 直接读本合约 USDC 余额）
+    /// @notice 金库当前托管的 USDC 余额（MVP：= asset().balanceOf(address(this)))
     function totalAssets() external view returns (uint256);
 
-    /// @notice 份额总量（等于 shareToken.totalSupply()）
+    /// @notice 份额总量（= shareToken.totalSupply()）
     function totalShares() external view returns (uint256);
+
+    /// @notice 是否处于暂停状态（若继承 Pausable，直接返回其 paused()）
+    function paused() external view returns (bool);
 
     // ----------------------- Mutations (User) -----------------------
 
     /// @notice 存入 USDC 并按 1:1 获得份额
     /// @dev 前置条件：
-    ///      1) 调用前用户需先对金库执行 USDC approve；
+    ///      1) 用户先对金库执行 USDC approve；
     ///      2) 调用者必须持有有效 KYC 通行证；
     ///      3) 金额需满足 min/max 限制，且金库未暂停。
     /// @param assets 存入 USDC 数量
@@ -111,8 +111,9 @@ interface ISimpleRwVault {
 
     /// @notice 清扫误转到金库的非受保护代币
     /// @dev 禁止清扫：USDC 基础资产、份额代币自身；仅管理员。
-    /// @param token ERC20 代币地址
+    /// @param token 被清扫的 ERC20 代币地址
+    /// @param to 接收地址（通常为管理员地址或金库存放运营钱包）
     /// @param amount 清扫数量
     /// @custom:reverts SweepNotAllowed | NotAuthorized
-    function sweep(address token, uint256 amount) external;
+    function sweep(address token, address to, uint256 amount) external;
 }
