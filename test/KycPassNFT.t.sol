@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {KycPassNFT} from "../src/KycPassNFT.sol";
 import {ChainConfig} from "../script/HelperConfig.s.sol";
-import {DeployAll} from "../script/DeployAll.s.sol";
+import {DeployKycPassNFT} from "../script/DeployKycPassNFT.s.sol";
 import {IKycPassNFT} from "../src/interfaces/IKycPassNFT.sol";
 import {IERC721} from "@openzeppelin/contracts/interfaces/IERC721.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
@@ -23,8 +23,8 @@ contract KycPassNFTTest is Test {
     IKycPassNFT.PassMeta meta;
 
     function setUp() public {
-        DeployAll deployAll = new DeployAll();
-        (kycPassNFT, chainConfig) = deployAll.run();
+        DeployKycPassNFT deployKycPassNFT = new DeployKycPassNFT();
+        (kycPassNFT, chainConfig) = deployKycPassNFT.run();
 
         ADMIN = vm.addr(chainConfig.deployerPrivateKey);
 
