@@ -10,7 +10,6 @@ import {IERC721} from "@openzeppelin/contracts/interfaces/IERC721.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
-
 contract KycPassNFTTest is Test {
     KycPassNFT kycPassNFT;
     ChainConfig chainConfig;
@@ -36,7 +35,7 @@ contract KycPassNFTTest is Test {
         meta = IKycPassNFT.PassMeta({tier: 1, expiresAt: uint64(block.timestamp + 1 days), countryCode: bytes32("CN")});
     }
 
-    function testInitialRoles() public view {
+    function test_InitialRoles() public view {
         assertTrue(kycPassNFT.hasRole(kycPassNFT.DEFAULT_ADMIN_ROLE(), ADMIN));
         assertTrue(kycPassNFT.hasRole(kycPassNFT.KYC_ISSUER_ROLE(), ADMIN));
         assertTrue(kycPassNFT.hasRole(kycPassNFT.KYC_ISSUER_ROLE(), KYC_ISSUER));
@@ -121,11 +120,11 @@ contract KycPassNFTTest is Test {
         // 快进到过期之后
         vm.warp(block.timestamp + 2 days);
 
-        (bool ok, ) = kycPassNFT.hasValidPass(USER1);
+        (bool ok,) = kycPassNFT.hasValidPass(USER1);
         assertFalse(ok);
     }
 
-    function test_SupportsInterface() public view{
+    function test_SupportsInterface() public view {
         assertTrue(kycPassNFT.supportsInterface(type(IERC721).interfaceId));
         assertTrue(kycPassNFT.supportsInterface(type(IERC721Metadata).interfaceId));
         assertTrue(kycPassNFT.supportsInterface(type(IAccessControl).interfaceId));

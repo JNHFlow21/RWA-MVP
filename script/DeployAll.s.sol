@@ -8,7 +8,6 @@ import {console2} from "forge-std/console2.sol";
 import {HelperConfig, ChainConfig} from "./HelperConfig.s.sol";
 
 contract DeployAll is Script {
-
     uint8 constant DECIMALS = 18;
 
     HelperConfig helperConfig = new HelperConfig();
@@ -18,7 +17,7 @@ contract DeployAll is Script {
     function run() public returns (KycPassNFT, ChainConfig memory, VaultToken) {
         vm.startBroadcast(chainConfig.deployerPrivateKey);
         KycPassNFT kycPassNFT = new KycPassNFT("KycPassNFT", "KPNFT", admin);
-        VaultToken vaultToken = new VaultToken("RWA-Share","RWAS",DECIMALS,admin);
+        VaultToken vaultToken = new VaultToken("RWA-Share", "RWAS", DECIMALS, admin);
         vm.stopBroadcast();
         return (kycPassNFT, chainConfig, vaultToken);
     }

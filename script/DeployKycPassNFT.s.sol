@@ -7,7 +7,6 @@ import {console2} from "forge-std/console2.sol";
 import {HelperConfig, ChainConfig} from "./HelperConfig.s.sol";
 
 contract DeployKycPassNFT is Script {
-
     HelperConfig helperConfig = new HelperConfig();
     ChainConfig chainConfig = helperConfig.getActiveChainConfig();
     address admin = vm.addr(chainConfig.deployerPrivateKey);

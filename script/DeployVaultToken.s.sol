@@ -7,7 +7,6 @@ import {console2} from "forge-std/console2.sol";
 import {HelperConfig, ChainConfig} from "./HelperConfig.s.sol";
 
 contract DeployVaultToken is Script {
-
     uint8 constant DECIMALS = 18;
 
     HelperConfig helperConfig = new HelperConfig();
@@ -16,7 +15,7 @@ contract DeployVaultToken is Script {
 
     function run() public returns (VaultToken, ChainConfig memory) {
         vm.startBroadcast(chainConfig.deployerPrivateKey);
-        VaultToken vaultToken = new VaultToken("RWA-Share","RWAS",DECIMALS,admin);
+        VaultToken vaultToken = new VaultToken("RWA-Share", "RWAS", DECIMALS, admin);
         vm.stopBroadcast();
         return (vaultToken, chainConfig);
     }
