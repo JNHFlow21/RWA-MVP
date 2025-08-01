@@ -11,6 +11,7 @@ import {DeployAll} from "../script/DeployAll.s.sol";
 import {ChainConfig} from "../script/HelperConfig.s.sol";
 import {IKycPassNFT} from "../src/interfaces/IKycPassNFT.sol";
 import {ISimpleRwVault} from "../src/interfaces/ISimpleRwVault.sol";
+import {Junktoken} from "../src/mocks/Junktoken.sol";
 
 contract SimpleRwVault_Flow is Test {
     address public admin;
@@ -23,6 +24,9 @@ contract SimpleRwVault_Flow is Test {
 
     uint256 public constant INITIAL_SUPPLY = 1e12;
     uint256 public constant DEPOSIT_AMOUNT = 1e6;
+    uint256 public constant SWEEP_AMOUNT = 1e2;
+    Junktoken junktoken;
+
     IKycPassNFT.PassMeta public meta = IKycPassNFT.PassMeta({
         tier: 1,
         expiresAt: uint64(block.timestamp + 1 days),
@@ -116,7 +120,6 @@ contract SimpleRwVault_Flow is Test {
 
     // pause 不可以申购，可以赎回
     function test_Pause_Unpause_Success() public {
-
         // deposit
         vm.startPrank(user);
         uint256 shares = deployConfig.vault.deposit(DEPOSIT_AMOUNT);
@@ -145,5 +148,30 @@ contract SimpleRwVault_Flow is Test {
         vm.startPrank(user);
         deployConfig.vault.deposit(DEPOSIT_AMOUNT);
         vm.stopPrank();
+    }
+
+    // sweep 不可以 share 和 usdc
+    function test_Cant_Sweep_Share_And_Usdc() public {
+        // mint junktoken
+        junktoken = new Junktoken();
+        // 先给自己铸，再转给 vault
+        junktoken.mint(address(this), 100e18);
+        // 先要给vault转入这些非法token，才能sweep
+        junktoken.transfer(address(deployConfig.vault), 10e18);
+
+        vm.startPrank(admin);
+        // 不可以 sweep share
+        vm.expectRevert(ISimpleRwVault.ISimpleRwVault__SweepNotAllowed.selector);
+        deployConfig.vault.sweep(address(deployConfig.share), other, SWEEP_AMOUNT);
+        // 不可以 sweep usdc
+        vm.expectRevert(ISimpleRwVault.ISimpleRwVault__SweepNotAllowed.selector);
+        deployConfig.vault.sweep(address(deployConfig.usdc), other, SWEEP_AMOUNT);
+
+        // 可以 sweep 其他 token
+        deployConfig.vault.sweep(address(junktoken), other, SWEEP_AMOUNT);
+
+        vm.stopPrank();
+
+        assertEq(junktoken.balanceOf(other), SWEEP_AMOUNT);
     }
 }
