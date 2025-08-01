@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {USDCMock} from "../src/mocks/USDCMock.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract USDCMockTest is Test {
     USDCMock public usdc;
@@ -49,4 +50,39 @@ contract USDCMockTest is Test {
         assertEq(usdc.balanceOf(charlie), INITIAL_SUPPLY);
         assertEq(usdc.totalSupply(), 4e12);
     }
+
+    // test transfer from / approve 
+    /* ============ A-1 approve 设置 ============ */
+    function test_Approve_SetsAllowance() public {
+        vm.prank(alice);
+        vm.expectEmit(true, true, false, true);
+        emit IERC20.Approval(alice, bob, INITIAL_SUPPLY);
+
+        usdc.approve(bob, INITIAL_SUPPLY);
+
+        assertEq(usdc.allowance(alice, bob), INITIAL_SUPPLY);
+    }
+
+    /* ============ A-2 transferFrom 消耗额度 ============ */
+    function test_TransferFrom_ReducesAllowance() public {
+        vm.startPrank(admin);
+        usdc.mint(alice, INITIAL_SUPPLY);
+        usdc.mint(charlie, INITIAL_SUPPLY);
+        vm.stopPrank();
+
+        vm.startPrank(alice);
+        usdc.approve(bob, INITIAL_SUPPLY);
+        vm.stopPrank();
+
+        uint256 aliceBefore = usdc.balanceOf(alice);
+        uint256 charlieBefore = usdc.balanceOf(charlie);
+
+        vm.prank(bob);
+        usdc.transferFrom(alice, charlie, INITIAL_SUPPLY);
+
+        assertEq(usdc.balanceOf(alice), aliceBefore - INITIAL_SUPPLY);
+        assertEq(usdc.balanceOf(charlie), charlieBefore + INITIAL_SUPPLY);
+        assertEq(usdc.allowance(alice, bob), 0);
+    }
+
 }
