@@ -68,4 +68,24 @@ contract SimpleRwVault_Flow is Test {
         assertEq(afterShares, beforeShares + shares);
 
     }
+
+    function test_Withdraw_Success() public {
+        vm.startPrank(user);
+        // deposit
+        uint256 shares = deployConfig.vault.deposit(DEPOSIT_AMOUNT);
+
+        //withdraw
+        uint256 beforeBalance = deployConfig.usdc.balanceOf(user);
+        uint256 beforeShares = deployConfig.share.balanceOf(user);
+
+        uint256 assets = deployConfig.vault.withdraw(shares);
+
+        uint256 afterBalance = deployConfig.usdc.balanceOf(user);
+        uint256 afterShares = deployConfig.share.balanceOf(user);
+
+        vm.stopPrank();
+
+        assertEq(afterBalance, beforeBalance + assets);
+        assertEq(afterShares, beforeShares - shares);
+    }
 }
