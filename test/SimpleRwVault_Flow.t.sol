@@ -10,6 +10,7 @@ import {USDCMock} from "../src/mocks/USDCMock.sol";
 import {DeployAll} from "../script/DeployAll.s.sol";
 import {ChainConfig} from "../script/HelperConfig.s.sol";
 import {IKycPassNFT} from "../src/interfaces/IKycPassNFT.sol";
+import {ISimpleRwVault} from "../src/interfaces/ISimpleRwVault.sol";
 
 contract SimpleRwVault_Flow is Test {
     address public admin;
@@ -87,5 +88,29 @@ contract SimpleRwVault_Flow is Test {
 
         assertEq(afterBalance, beforeBalance + assets);
         assertEq(afterShares, beforeShares - shares);
+    }
+
+    // 限额 min / max
+    function test_Deposit_Limits() public {
+
+        uint256 minDepositPerTx = 1e2;
+        uint256 maxDepositPerTx = 1e7;
+        uint256 succDepositAmount = 1e6;
+        uint256 failDepositAmount = 1e1;
+
+        vm.startPrank(admin);
+        deployConfig.vault.setDepositLimits(minDepositPerTx, maxDepositPerTx);
+        vm.stopPrank();
+
+        vm.startPrank(user);
+
+        vm.expectRevert(ISimpleRwVault.ISimpleRwVault__InvalidAmount.selector);
+        deployConfig.vault.deposit(failDepositAmount);
+
+        deployConfig.vault.deposit(succDepositAmount);
+        vm.stopPrank();
+
+        assertEq(deployConfig.vault.minDeposit(), minDepositPerTx);
+        assertEq(deployConfig.vault.maxDepositPerTx(), maxDepositPerTx);
     }
 }
