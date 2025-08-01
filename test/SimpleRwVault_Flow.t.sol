@@ -113,4 +113,37 @@ contract SimpleRwVault_Flow is Test {
         assertEq(deployConfig.vault.minDeposit(), minDepositPerTx);
         assertEq(deployConfig.vault.maxDepositPerTx(), maxDepositPerTx);
     }
+
+    // pause 不可以申购，可以赎回
+    function test_Pause_Unpause_Success() public {
+
+        // deposit
+        vm.startPrank(user);
+        uint256 shares = deployConfig.vault.deposit(DEPOSIT_AMOUNT);
+        vm.stopPrank();
+
+        // pause
+        vm.startPrank(admin);
+        deployConfig.vault.pause();
+        vm.stopPrank();
+
+        // deposit fail
+        vm.startPrank(user);
+        vm.expectRevert(ISimpleRwVault.ISimpleRwVault__PausedError.selector);
+        deployConfig.vault.deposit(DEPOSIT_AMOUNT);
+
+        // withdraw success
+        deployConfig.vault.withdraw(shares);
+        vm.stopPrank();
+
+        // unpause
+        vm.startPrank(admin);
+        deployConfig.vault.unpause();
+        vm.stopPrank();
+
+        // deposit success
+        vm.startPrank(user);
+        deployConfig.vault.deposit(DEPOSIT_AMOUNT);
+        vm.stopPrank();
+    }
 }
