@@ -18,7 +18,7 @@ library DeployLib {
 
     uint8 constant _decimals = 6;
 
-    function deployAll(address admin, address kycIssuer) public returns (DeployConfig memory) {
+    function deployAll(address admin) public returns (DeployConfig memory) {
         DeployConfig memory config;
 
         config.usdc = new USDCMock(admin);

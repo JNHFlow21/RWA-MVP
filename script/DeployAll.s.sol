@@ -7,15 +7,14 @@ import {HelperConfig, ChainConfig} from "./HelperConfig.s.sol";
 import {DeployLib} from "./DeployLib.sol";
 
 contract DeployAll is Script {
-    uint8 constant DECIMALS = 18;
 
     HelperConfig helperConfig = new HelperConfig();
     ChainConfig chainConfig = helperConfig.getActiveChainConfig();
     address admin = vm.addr(chainConfig.deployerPrivateKey);
 
-    function run() public returns (DeployLib.DeployConfig memory deployConfig) {
+    function run() public returns (DeployLib.DeployConfig memory deployConfig, ChainConfig memory) {
         vm.startBroadcast(chainConfig.deployerPrivateKey);
-        deployConfig = DeployLib.deployAll(admin, admin);
+        deployConfig = DeployLib.deployAll(admin);
         vm.stopBroadcast();
 
         vm.startPrank(admin);
@@ -28,6 +27,6 @@ contract DeployAll is Script {
         console2.log("Share    :", address(deployConfig.share));
         console2.log("KycPass  :", address(deployConfig.pass));
 
-        return deployConfig;
+        return (deployConfig, chainConfig);
     }
 }
