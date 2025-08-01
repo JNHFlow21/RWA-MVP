@@ -7,7 +7,7 @@ import {console2} from "forge-std/console2.sol";
 import {HelperConfig, ChainConfig} from "./HelperConfig.s.sol";
 
 contract DeployVaultToken is Script {
-    uint8 constant DECIMALS = 18;
+    uint8 constant DECIMALS = 6;
 
     HelperConfig helperConfig = new HelperConfig();
     ChainConfig chainConfig = helperConfig.getActiveChainConfig();
