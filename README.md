@@ -25,6 +25,8 @@
 
 ![KYC Pass 示意](image/valid.svg)
 
+![KYC Pass 示意](image/revoke.svg)
+
 ---
 
 ## 未来可优化方向
@@ -83,19 +85,6 @@ make deploy-anvil
 ```bash
 make test         # forge test -vvv
 # 跑单个用例：make test-<TestName>
-```
-
-### 5⃣ 常见交互示例
-
-```bash
-# KYC 发行者给用户签发通行证
-cast send <KycPassNFT> "mintPass(address,(uint8,uint64,bytes32))" \
-  <user> "(1,0,'0x434E')" \
-  --rpc-url $ANVIL_RPC_URL --private-key $ANVIL_PRIVATE_KEY
-
-# 用户申购 100 USDC 份额
-cast send <USDC> "approve(address,uint256)" <SimpleRwVault> 100e6 --from <user>
-cast send <SimpleRwVault> "deposit(uint256)" 100e6 --from <user>
 ```
 
 ---
