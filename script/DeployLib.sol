@@ -18,12 +18,15 @@ library DeployLib {
 
     uint8 constant _decimals = 6;
 
-    function deployAll(address admin) public returns (DeployConfig memory) {
+    function deployAll(address admin, string memory svgValid, string memory svgRevoke)
+        public
+        returns (DeployConfig memory)
+    {
         DeployConfig memory config;
 
         config.usdc = new USDCMock(admin);
         config.share = new VaultToken("Share", "SHR", _decimals, admin);
-        config.pass = new KycPassNFT("Pass", "PASS", admin);
+        config.pass = new KycPassNFT("Pass", "PASS", admin, svgValid, svgRevoke);
         config.vault = new SimpleRwVault(config.usdc, config.share, config.pass, admin, "https://example.com", 0, 0);
 
         return config;

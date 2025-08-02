@@ -4,9 +4,13 @@ pragma solidity ^0.8.20;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IKycPassNFT} from "./interfaces/IKycPassNFT.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
+    using Strings for uint256;
     // ---------- Roles ----------
+
     bytes32 public constant KYC_ISSUER_ROLE = keccak256("KYC_ISSUER_ROLE");
 
     // ---------- Extra Errors ----------
@@ -24,12 +28,24 @@ contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
     uint256 private _tokenIdCounter;
 
     /// @dev 可选：元数据基地址（如 "ipfs://..."），仅演示用途
-    string private _baseTokenURI;
+    string private constant _BASE_TOKEN_URI = "data:application/json;base64,";
+    string private constant _BASE_IMAGE_URI = "data:image/svg+xml;base64,";
+
+    string private svgValid;
+    string private svgRevoke;
 
     // ---------- Constructor ----------
-    constructor(string memory name_, string memory symbol_, address admin) ERC721(name_, symbol_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        address admin,
+        string memory svgValid_,
+        string memory svgRevoke_
+    ) ERC721(name_, symbol_) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(KYC_ISSUER_ROLE, admin);
+        svgValid = svgValid_;
+        svgRevoke = svgRevoke_;
     }
 
     // ---------- IKycPassNFT: Views ----------
@@ -105,6 +121,60 @@ contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
             revert IKycPassNFT__TransferDisabled();
         }
         return super._update(to, tokenId, auth);
+    }
+
+    function _countryToString(bytes32 cc) internal pure returns (string memory) {
+        // 把 bytes32 先打包成 bytes，方便逐字节遍历
+        bytes memory buf = abi.encodePacked(cc);
+
+        // 计算实际长度（遇到 0x00 视为终止）
+        uint256 len = 0;
+        while (len < buf.length && buf[len] != 0) {
+            len++;
+        }
+
+        // 拷贝出有效部分
+        bytes memory out = new bytes(len);
+        for (uint256 i = 0; i < len; i++) {
+            out[i] = buf[i];
+        }
+        return string(out);
+    }
+
+    // ---------- tokenURI：动态选择模板并组装 JSON ----------
+    // svg -> base64svg -> baseImageUri+base64svg -> json -> base64json -> baseTokenUri+base64json = tokenURI
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        address holder = _requireOwned(tokenId);
+        (bool ok, PassMeta memory m) = hasValidPass(holder);
+
+        // 1) 选模板并转为 data:image
+        string memory svg = ok ? svgValid : svgRevoke;
+
+        string memory imgURI = string.concat(_BASE_IMAGE_URI, Base64.encode(bytes(svg)));
+
+        // 2) 组装 metadata（最少包含 name/description/image）
+        bytes memory json = abi.encodePacked(
+            '{"name":"KYC Pass #',
+            tokenId.toString(),
+            '",',
+            '"description":"Soulbound KYC pass (on-chain SVG via template).",',
+            '"image":"',
+            imgURI,
+            '",',
+            '"attributes":[' '{"trait_type":"status","value":"',
+            (ok ? "VALID" : "REVOKED"),
+            '"},',
+            '{"trait_type":"tier","value":"',
+            Strings.toString(m.tier),
+            '"},',
+            '{"trait_type":"country","value":"',
+            _countryToString(m.countryCode),
+            '"},',
+            '{"display_type":"date","trait_type":"expiresAt","value":"',
+            Strings.toString(m.expiresAt),
+            '"}' "]}"
+        );
+        return string.concat(_BASE_TOKEN_URI, Base64.encode(json));
     }
 
     /// @dev 禁止创建授权，避免“可转让”的错觉

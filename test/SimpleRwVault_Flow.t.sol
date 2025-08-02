@@ -27,11 +27,8 @@ contract SimpleRwVault_Flow is Test {
     uint256 public constant SWEEP_AMOUNT = 1e2;
     Junktoken junktoken;
 
-    IKycPassNFT.PassMeta public meta = IKycPassNFT.PassMeta({
-        tier: 1,
-        expiresAt: uint64(block.timestamp + 1 days),
-        countryCode: bytes32("CN")
-    });
+    IKycPassNFT.PassMeta public meta =
+        IKycPassNFT.PassMeta({tier: 1, expiresAt: uint64(block.timestamp + 1 days), countryCode: bytes32("CN")});
 
     function setUp() public {
         DeployAll deployAll = new DeployAll();
@@ -50,7 +47,7 @@ contract SimpleRwVault_Flow is Test {
         deployConfig.usdc.approve(address(deployConfig.vault), type(uint256).max);
     }
 
-    function test_Approve_Success() public view{
+    function test_Approve_Success() public view {
         assertEq(deployConfig.usdc.allowance(user, address(deployConfig.vault)), type(uint256).max);
     }
 
@@ -71,7 +68,6 @@ contract SimpleRwVault_Flow is Test {
         // shares 增加 / usdc 减少
         assertEq(afterBalance, beforeBalance - DEPOSIT_AMOUNT);
         assertEq(afterShares, beforeShares + shares);
-
     }
 
     function test_Withdraw_Success() public {
@@ -96,7 +92,6 @@ contract SimpleRwVault_Flow is Test {
 
     // 限额 min / max
     function test_Deposit_Limits() public {
-
         uint256 minDepositPerTx = 1e2;
         uint256 maxDepositPerTx = 1e7;
         uint256 succDepositAmount = 1e6;

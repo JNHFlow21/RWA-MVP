@@ -10,7 +10,7 @@ contract USDCMockTest is Test {
     address public admin;
     address public user = makeAddr("user");
     address public alice = makeAddr("alice");
-    address public bob   = makeAddr("bob");
+    address public bob = makeAddr("bob");
     address public charlie = makeAddr("charlie");
 
     uint256 public constant INITIAL_SUPPLY = 1e12;
@@ -20,16 +20,16 @@ contract USDCMockTest is Test {
         usdc = new USDCMock(admin);
     }
 
-    function test_Decimals() public view{
+    function test_Decimals() public view {
         assertEq(usdc.decimals(), 6);
     }
 
-    function test_Mint_Success() public view{
+    function test_Mint_Success() public view {
         assertEq(usdc.balanceOf(admin), INITIAL_SUPPLY);
         assertEq(usdc.totalSupply(), INITIAL_SUPPLY);
     }
 
-    function test_Transfer_Success() public{
+    function test_Transfer_Success() public {
         vm.startPrank(admin);
         usdc.transfer(user, INITIAL_SUPPLY);
         assertEq(usdc.balanceOf(user), INITIAL_SUPPLY);
@@ -38,7 +38,7 @@ contract USDCMockTest is Test {
         vm.stopPrank();
     }
 
-    function test_MintForOtherAddress_Success() public{
+    function test_MintForOtherAddress_Success() public {
         vm.startPrank(admin);
         usdc.mint(alice, INITIAL_SUPPLY);
         usdc.mint(bob, INITIAL_SUPPLY);
@@ -51,7 +51,7 @@ contract USDCMockTest is Test {
         assertEq(usdc.totalSupply(), 4e12);
     }
 
-    // test transfer from / approve 
+    // test transfer from / approve
     /* ============ A-1 approve 设置 ============ */
     function test_Approve_SetsAllowance() public {
         vm.prank(alice);
@@ -84,5 +84,4 @@ contract USDCMockTest is Test {
         assertEq(usdc.balanceOf(charlie), charlieBefore + INITIAL_SUPPLY);
         assertEq(usdc.allowance(alice, bob), 0);
     }
-
 }

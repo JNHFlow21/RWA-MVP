@@ -4,6 +4,12 @@ out = "out"
 libs = ["lib"]
 via_ir = true
 optimizer = true
+fs_permissions = [
+    { access = "read", path = "./broadcast" },
+    { access = "read", path = "./reports" },
+    { access = "read", path = "./image/" },
+]
+ffi = true
 
 remappings = [
     '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/'

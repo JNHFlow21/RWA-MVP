@@ -11,9 +11,12 @@ contract DeployKycPassNFT is Script {
     ChainConfig chainConfig = helperConfig.getActiveChainConfig();
     address admin = vm.addr(chainConfig.deployerPrivateKey);
 
+    string svgValid = vm.readFile("image/valid.svg");
+    string svgRevoke = vm.readFile("image/revoke.svg");
+
     function run() public returns (KycPassNFT, ChainConfig memory) {
         vm.startBroadcast(chainConfig.deployerPrivateKey);
-        KycPassNFT kycPassNFT = new KycPassNFT("KycPassNFT", "KPNFT", admin);
+        KycPassNFT kycPassNFT = new KycPassNFT("KycPassNFT", "KPNFT", admin, svgValid, svgRevoke);
         vm.stopBroadcast();
         return (kycPassNFT, chainConfig);
     }
