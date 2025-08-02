@@ -51,6 +51,15 @@ deploy-mainnet:
 	@echo "🚀 Deploying to Mainnet..."
 	@forge script script/DeployAll.s.sol:DeployAll --rpc-url $(MAINNET_RPC_URL) --private-key $(MAINNET_PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvv
 
+# ========== 单独部署 ==========
+deploy-pass:
+	@echo "🚀 Deploying to local Anvil..."
+	@forge script script/DeployKycPassNFT.s.sol:DeployKycPassNFT --rpc-url $(ANVIL_RPC_URL) --private-key $(ANVIL_PRIVATE_KEY) --broadcast -vvv
+
+deploy-share:
+	@echo "🚀 Deploying to local Anvil..."
+	@forge script script/DeployVaultToken.s.sol:DeployVaultToken --rpc-url $(ANVIL_RPC_URL) --private-key $(ANVIL_PRIVATE_KEY) --broadcast -vvv
+
 # ========== NFT ==========
 deploy-Luffy:
 	@echo "🚀 Deploying to Sepolia..."
