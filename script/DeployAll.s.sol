@@ -19,6 +19,7 @@ contract DeployAll is Script {
         KycPassNFT pass;
         SimpleRwVault vault;
     }
+    
     DeployConfig deployConfig;
     HelperConfig helperConfig = new HelperConfig();
     ChainConfig chainConfig = helperConfig.getActiveChainConfig();
@@ -53,7 +54,7 @@ contract DeployAll is Script {
         uint256 tokenId = deployConfig.pass.mintPass(admin,meta);
         address owner = deployConfig.pass.ownerOf(tokenId);
         require(owner == admin, "minted token not owned by admin");
-        
+
         vm.stopBroadcast();
 
         console2.log("Vault    :", address(deployConfig.vault));

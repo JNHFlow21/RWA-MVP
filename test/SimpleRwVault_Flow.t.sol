@@ -13,13 +13,16 @@ import {IKycPassNFT} from "../src/interfaces/IKycPassNFT.sol";
 import {ISimpleRwVault} from "../src/interfaces/ISimpleRwVault.sol";
 import {Junktoken} from "../src/mocks/Junktoken.sol";
 
+import {DeployAll} from "../script/DeployAll.s.sol";
+
 contract SimpleRwVault_Flow is Test {
+
     address public admin;
     address public kycIssuer;
     address public user = makeAddr("user");
     address public other = makeAddr("other");
 
-    DeployLib.DeployConfig deployConfig;
+    DeployAll.DeployConfig deployConfig;
     ChainConfig chainConfig;
 
     uint256 public constant INITIAL_SUPPLY = 1e12;
