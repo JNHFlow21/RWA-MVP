@@ -21,7 +21,7 @@
 
 > 📱 **钱包可见**：由于遵循 ERC-721 标准，通行证可以直接在 MetaMask、Rainbow 等支持 NFT 的钱包里查看；SVG 元数据在链上实时生成。
 
-### 通行证示意图
+### PassNFT
 
 ![KYC Pass 示意](image/valid.svg)
 
