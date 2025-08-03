@@ -10,7 +10,7 @@ import {HelperConfig, ChainConfig} from "./HelperConfig.s.sol";
 import {DevOpsTools} from "lib/foundry-devops/src/DevOpsTools.sol";
 
 contract autoMintLuffyNFT is Script {
-    string public constant LUFFY_URI = "ipfs://QmV2WHpdB9FcEApEqn1yAgLo7UovXG7qZjUNmMAjsEonH8";
+    string public constant LUFFY_URI = "ipfs://QmV2WHpdB9FcEApEqn1yAgLo7UovXG7qZjUNmMAjsEonH8"; // json cid
 
     HelperConfig helperConfig = new HelperConfig();
     ChainConfig chainConfig = helperConfig.getActiveChainConfig();

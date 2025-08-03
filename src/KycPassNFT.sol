@@ -27,7 +27,7 @@ contract KycPassNFT is IKycPassNFT, ERC721, AccessControl {
     /// @dev 自增的 tokenId 计数器（从 1 开始，便于用 0 表示无证）
     uint256 private _tokenIdCounter;
 
-    /// @dev 可选：元数据基地址（如 "ipfs://..."），仅演示用途
+    /// @dev Metadata基地址
     string private constant _BASE_TOKEN_URI = "data:application/json;base64,";
     string private constant _BASE_IMAGE_URI = "data:image/svg+xml;base64,";
 
